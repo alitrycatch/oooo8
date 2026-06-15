@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
@@ -11,8 +6,61 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 model User {
-  id    Int    @id @default(autoincrement())
+  id    Int     @id @default(autoincrement())
+  email String  @unique
   name  String?
-  email String @unique
+}
+
+model Building {
+  id           String                @id @default(cuid())
+  location     String?
+  builtYear    Int?
+  architect    String?
+  lat          Float?
+  lng          Float?
+  images       BuildingImage[]
+  videos       BuildingVideo[]
+  tags         BuildingTag[]
+  translations BuildingTranslation[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model BuildingTranslation {
+  id          String   @id @default(cuid())
+  lang        String // "fa", "en", "ar", "de", "fr" ...
+  name        String
+  description String
+  building    Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  buildingId  String
+
+  @@unique([buildingId, lang])
+}
+
+model BuildingImage {
+  id         String   @id @default(cuid())
+  url        String
+  caption    String?
+  order      Int      @default(0)
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  buildingId String
+  createdAt  DateTime @default(now())
+}
+
+model BuildingVideo {
+  id         String   @id @default(cuid())
+  url        String
+  title      String?
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  buildingId String
+  createdAt  DateTime @default(now())
+}
+
+model BuildingTag {
+  id         String   @id @default(cuid())
+  name       String
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  buildingId String
 }
